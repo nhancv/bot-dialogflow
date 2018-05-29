@@ -28,3 +28,31 @@ app.get('/', function(req, res) {
 app.listen(port, function() {
   log('Server listening at port %d', port)
 })
+
+
+import Weather from './weather/'
+app.post('/weather', function(req, res) {
+  try {
+    // Get the city and date from the request
+  let city = req.body.queryResult.parameters['geo-city'] // city is a required param
+
+  // Get the date for the weather forecast (if present)
+  let date = ''
+  if (req.body.queryResult.parameters['date']) {
+    date = req.body.queryResult.parameters['date']
+    console.log('Date: ' + date)
+  }
+
+  // Call the weather API
+  new Weather().callWeatherApi(city, date)
+    .then(output => {
+      res.json({ fulfillmentText: output }) // Return the results of the weather API to Dialogflow
+    })
+    .catch(() => {
+      res.json({ fulfillmentText: `I don't know the weather but I hope it's good!` })
+    })
+  } catch (error) {
+    res.json({ fulfillmentText: `I don't know the weather but I hope it's good!` })
+  }
+  
+})
